@@ -2,6 +2,10 @@
 
 int main(int argc, char* argv)
 {
-	printf("Hello world\n");
+	int a, b;
+	a = 10;
+	b = 20;
+
+	printf("Hello world %d\n", a+b);
 	return 0;
 }
