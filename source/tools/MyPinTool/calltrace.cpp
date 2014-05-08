@@ -265,52 +265,6 @@ VOID check_ins(INS ins) {
 						   IARG_THREAD_ID,
 						   IARG_END);
 	}
-#if 0	
-	else if(INS_IsSyscall(ins)) {
-
-		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) syscall_site,
-					   IARG_INST_PTR,
-					   IARG_BRANCH_TAKEN, 
-					   IARG_BRANCH_TARGET_ADDR,
-					   IARG_ADDRINT, INS_NextAddress(ins),
-					   IARG_END);
-
-	} else if(INS_IsDirectBranchOrCall(ins)) {
-
-		if(INS_IsCall(ins))
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) call_site,
-						   IARG_INST_PTR,
-						   IARG_BRANCH_TAKEN,
-						   IARG_BRANCH_TARGET_ADDR,
-						   IARG_ADDRINT, INS_NextAddress(ins),
-						   IARG_THREAD_ID,
-						   IARG_END);
-		else
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) branch_site,
-						   IARG_INST_PTR,
-						   IARG_BRANCH_TAKEN,
-						   IARG_ADDRINT, INS_NextAddress(ins),
-						   IARG_END);
-
-	} else if(INS_IsIndirectBranchOrCall(ins)) {
-
-		if(INS_IsCall(ins))
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) in_call_site,
-							    IARG_INST_PTR,
-							    IARG_BRANCH_TAKEN,
-							    IARG_BRANCH_TARGET_ADDR,
-							    IARG_ADDRINT, INS_NextAddress(ins),
-								IARG_THREAD_ID,
-							  	IARG_END);
-		else
-			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) in_branch_site, 
-							    IARG_INST_PTR,
-							    IARG_BRANCH_TAKEN,
-							    IARG_ADDRINT, INS_NextAddress(ins),
-							    IARG_END);
-
-	}
-#endif
 	else if(INS_IsLea(ins) && INS_OperandReg(ins,0) == REG_ESP && INS_RegRContain(ins, REG_EBP)) {
 
 		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)stk_site,
