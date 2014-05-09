@@ -2,8 +2,6 @@
 #include "pin_isa.H"
 #include "calltrace.h"
 
-//using namespace std;
-
 char* exe;
 UINT entry_addr;
 UINT end_addr;
