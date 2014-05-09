@@ -7,16 +7,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-#define D_LOG 0
-#define SYSLOG 0
+#define WINS		0
 #define MAIN_ADDR 	5
 #define EXE_NAME 	7
 #define RESULT "test_result"
+typedef unsigned int UINT;
 
 using namespace std;
 
-typedef unsigned int UINT;
 typedef enum {
 	eCNT_PUSH=0,
 	eCNT_RET,
@@ -54,9 +52,7 @@ typedef struct{
 	UINT ret;
 }INFO;
 
-/****************************************************************
-*****************************************************************
-****************************************************************/
+/****************************************************************/
 
 class CIns {
 
@@ -93,11 +89,7 @@ class CRet : virtual public CIns {
 
 public:
 	CRet(UINT retval, string callee, string caller, 
-		 UINT size, UINT next_ins, UINT ip, 
-#if SYSLOG
-		 bool is_sysret, 
-#endif
-		 UINT tid);
+		 UINT size, UINT next_ins, UINT ip, UINT tid);
 
 	virtual ~CRet() {}
 	void print_data(FILE* fd);
@@ -110,10 +102,6 @@ private:
 
 	string 	callee;
 	string 	caller;
-
-#if SYSLOG
-	bool b_sysret;
-#endif
 };
 
 class CSub : virtual public CIns {
@@ -152,9 +140,7 @@ private:
 	string 	func_name; 
 };
 
-/****************************************************************
-*****************************************************************
-****************************************************************/
+/****************************************************************/
 
 CCall::CCall(UINT target, string str_func, string str_img, 
 		  	 UINT next_ins, UINT ip, UINT tid) {
@@ -177,13 +163,8 @@ void CCall::print_data(FILE* fd) {
 										 this->func_name.c_str());
 }
 
-#if SYSLOG
-CRet::CRet(UINT retval, string callee, string caller, 
-		   UINT size, UINT next_ins, UINT ip, bool is_sysret, UINT tid) {
-#else
 CRet::CRet(UINT retval, string callee, string caller, 
 		   UINT size, UINT next_ins, UINT ip, UINT tid) {
-#endif 
 
 	this->ret_value 	= retval;
 	this->callee 		= callee;
@@ -194,24 +175,14 @@ CRet::CRet(UINT retval, string callee, string caller,
 	this->ins_addr 		= ip;
 	this->etype 		= eCNT_RET;
 	this->tid 			= tid;
-#if SYSLOG
-	this->b_sysret 		= is_sysret;
-#endif
 }
 
 void CRet::print_data(FILE* fd) {
 
-#if SYSLOG
-	fprintf(fd, "R %#x\t%#x\t%s\t%d\n", this->ins_addr, 
-									 this->ret_value,
-							 		 this->b_sysret ? "SYSRET" : "NOMRET",
-							 		 this->framesize);
-#else
 	fprintf(fd, "R %#x\t%#x\t%#x\t%d\n", this->ins_addr, 
 							 	  this->ret_value,
 								  this->nextins_addr,
 							 	  this->framesize);
-#endif
 }
 
 CSub::CSub(UINT value, UINT esp, UINT next_ins, UINT ip, UINT tid) {
@@ -252,9 +223,8 @@ CStk::CStk(UINT size, UINT ip, string func, UINT tid) {
 	this->func_name = func;
 
 	this->ins_addr 	= ip;
-	this->etype 		= eCNT_FRM; 
+	this->etype 	= eCNT_FRM; 
 	this->tid 		= tid;
-	
 }
 
 void CStk::print_data(FILE* fd) {

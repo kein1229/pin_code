@@ -76,13 +76,8 @@ VOID fini(INT32 code, VOID *v) {
 	}
 }
 
-#if SYSLOG
-VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize,
-			  ADDRINT nextip, ADDRINT tid, bool is_sysret) { 
-#else 
 VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, 
 			  ADDRINT nextip, ADDRINT tid) { 
-#endif
 	
 	ADDRINT retval;
 	ADDRINT rspval = *rsp;
@@ -107,9 +102,6 @@ VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize,
 									   framesize,
 									   (UINT)nextip,
 									   (UINT)ip,
-#if SYSLOG
-									   is_sysret,
-#endif
 									   (UINT)tid);
 				
 				vecdata.push_back(pNew);
@@ -260,7 +252,7 @@ VOID check_ins(INS ins) {
 					   IARG_END);
 
 	} 
-#if window
+#if WINS
 	else if(op == XED_ICLASS_MOV && INS_OperandIsReg(ins,0) && 
 			  INS_OperandIsReg(ins,1) && REG_is_gr(INS_OperandReg(ins,0)) &&
 			  REG_is_gr(INS_OperandReg(ins, 1))) {
@@ -284,10 +276,6 @@ VOID check_ins(INS ins) {
 
 		if( INS_OperandReg(ins,0) == REG_ESP && INS_OperandIsImmediate(ins,1) )	{
 
-#if D_LOG
-			printf("cur  ins : %s\n",INS_Disassemble(ins).c_str());
-			printf("prev ins : %s\n\n",INS_Disassemble(INS_Prev(ins)).c_str());
-#endif
 			INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR) sub_add_site,
 						   IARG_INST_PTR,
 						   IARG_ADDRINT, (ADDRINT)INS_OperandImmediate(ins,1),
