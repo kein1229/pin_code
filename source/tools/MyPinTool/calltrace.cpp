@@ -11,18 +11,6 @@ UINT main_tid;
 bool trace_flag=false;
 vector<CIns*> vecdata;
 
-VOID branch_site(VOID* ip, INT32 taken, ADDRINT nextip) { 
-	if(trace_flag){}
-}
-
-VOID syscall_site(VOID* ip, INT32 taken, ADDRINT tgtip, ADDRINT nextip) { 
-	if(trace_flag){}
-}
-
-VOID in_branch_site(VOID* ip, INT32 taken, ADDRINT nextip) { 
-	if(trace_flag){}
-}
-
 void set_tracing(bool flag) {
 	trace_flag = flag;
 }
@@ -72,12 +60,10 @@ VOID fini(INT32 code, VOID *v) {
 		return;
 	}
 
-
 	vector<CIns*>::iterator it = vecdata.begin();
 
 	while(it != vecdata.end()) {
-		CIns* pdata = *it;
-		if(pdata) {
+		CIns* pdata = *it; if(pdata) {
 
 			FILE* fd = create_fd(pdata->tid);
 			if(!fd)
@@ -85,16 +71,19 @@ VOID fini(INT32 code, VOID *v) {
 
 			pdata->print_data(fd);
 			delete pdata;
-		} else
-			printf("pdata null\n");
+
+		} else printf("pdata null\n");
+
 		++it;
 	}
 }
 
 #if SYSLOG
-VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, ADDRINT nextip, ADDRINT tid, bool is_sysret) { 
+VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize,
+			  ADDRINT nextip, ADDRINT tid, bool is_sysret) { 
 #else 
-VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, ADDRINT nextip, ADDRINT tid) { 
+VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, 
+			  ADDRINT nextip, ADDRINT tid) { 
 #endif
 	
 	ADDRINT retval;
@@ -102,18 +91,18 @@ VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, ADDRINT nextip, ADDRINT 
 	ADDRINT *psp = (ADDRINT *)rspval;
 	retval = *psp;
 
-	if(trace_flag)
-	{
+	if(trace_flag) {
+
 		PIN_LockClient();
 
 		UINT cur_ins =(UINT)ip;
 		RTN callee_rtn = RTN_FindByAddress(cur_ins);
 
-		if(RTN_Valid(callee_rtn))
-		{
+		if(RTN_Valid(callee_rtn)) {
+
 			RTN caller_rtn = RTN_FindByAddress(nextip);
-			if(RTN_Valid(caller_rtn))
-			{
+			if(RTN_Valid(caller_rtn)) {
+
 				CIns* pNew = new CRet( (UINT)retval,
 									   RTN_FindNameByAddress(cur_ins),
 									   RTN_FindNameByAddress(nextip),
@@ -137,28 +126,16 @@ VOID ret_site(VOID* ip, ADDRINT* rsp, UINT32 framesize, ADDRINT nextip, ADDRINT 
 		set_tracing(false);
 }
 
-VOID in_call_site(VOID* ip, INT32 taken, ADDRINT tgtip, ADDRINT nextip, THREADID tid) { 
-
-	if(tgtip == entry_addr && !trace_flag)
-	{
-		set_tracing(true);
-		main_tid = tid;
-		end_addr = nextip;
-
-		CIns* pNew = new CCall( (UINT)tgtip,
-								 RTN_FindNameByAddress((UINT)tgtip),
-								 IMG_Name(SEC_Img(RTN_Sec(RTN_FindByAddress(tgtip)))),
-								 (UINT)nextip,
-								 (UINT)ip,
-								 (UINT)tid);
-
-		vecdata.push_back(pNew);
-	}
-}
-
 VOID call_site(VOID* ip, INT32 taken, ADDRINT tgtip, ADDRINT nextip, THREADID tid) { 
 
 	PIN_LockClient();
+	
+	if(tgtip == entry_addr && !trace_flag) {
+
+		set_tracing(true);
+		main_tid = tid;
+		end_addr = nextip;
+	}
 	
 	if(trace_flag) {
 
@@ -264,8 +241,9 @@ VOID check_ins(INS ins) {
 						   IARG_ADDRINT, INS_NextAddress(ins),
 						   IARG_THREAD_ID,
 						   IARG_END);
-	}
-	else if(INS_IsLea(ins) && INS_OperandReg(ins,0) == REG_ESP && INS_RegRContain(ins, REG_EBP)) {
+
+	} else if(INS_IsLea(ins) && INS_OperandReg(ins,0) == 
+			  REG_ESP && INS_RegRContain(ins, REG_EBP)) {
 
 		INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)stk_site,
 					   IARG_INST_PTR,
