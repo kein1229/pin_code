@@ -34,9 +34,11 @@ FILE* create_fd(int tid)
 		return mapFD[tid];
 
 	if(main_tid == (UINT)tid)
-		sprintf(buf,"../%s/%s_main.out", RESULT, exe);
+		sprintf(buf,"./%s_main.out", exe);
+//		sprintf(buf,"../%s/%s_main.out", RESULT, exe);
 	else
-		sprintf(buf,"../%s/%s_%d.out", RESULT, exe, tid);
+		sprintf(buf,"./%s_%d.out", exe, tid);
+//		sprintf(buf,"../%s/%s_%d.out", RESULT, exe, tid);
 
 	printf("File : %s\n",buf);
 	FILE* pFd = fopen(buf,"w+");
@@ -65,8 +67,11 @@ VOID fini(INT32 code, VOID *v) {
 		CIns* pdata = *it; if(pdata) {
 
 			FILE* fd = create_fd(pdata->tid);
-			if(!fd)
+			if(!fd)	{
+
+				printf("fd is null\n");
 				return;
+			}
 
 			pdata->print_data(fd);
 			delete pdata;
