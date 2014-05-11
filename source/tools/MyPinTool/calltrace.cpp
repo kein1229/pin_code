@@ -40,11 +40,12 @@ FILE* create_fd(int tid)
 
 	printf("File : %s\n",buf);
 	FILE* pFd = fopen(buf,"w+");
-	if(!pFd)
-	{
+	if(!pFd){
+
 		printf("File open failed %d\n",tid);
 		return NULL;
 	}
+	
 	mapFD[tid] =  pFd;
 
 	return mapFD[tid];
