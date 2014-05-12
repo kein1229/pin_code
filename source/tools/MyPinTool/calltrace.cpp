@@ -40,11 +40,11 @@ FILE* create_fd(int tid)
 		sprintf(buf,"./%s_%d.out", exe, tid);
 //		sprintf(buf,"../%s/%s_%d.out", RESULT, exe, tid);
 
-	printf("File : %s\n",buf);
+	printf("[create_fd] File : %s\n",buf);
 	FILE* pFd = fopen(buf,"w+");
 	if(!pFd){
 
-		printf("File open failed %d\n",tid);
+		printf("[create_fd] File open failed %d\n",tid);
 		return NULL;
 	}
 	
@@ -53,11 +53,34 @@ FILE* create_fd(int tid)
 	return mapFD[tid];
 }
 
+#if 0
+map<UINT, CCall*> callmap;
+
+void call_cnt(CIns* pdata) {
+
+	CCall* pcall = (CCall*)pdata;
+	UINT target_addr = NULL;
+	if(pcall)
+		target_addr = pcall->target_addr;
+	else {
+
+		printf("[call_cnt] pcall is null\n");
+		return;
+	}
+
+	map<UINT, CCall*>::iterator it = callmap.find(target_addr);
+	if(it == callmap.end())
+		callmap[target_addr]=pcall;
+	else
+		callmap[target_addr]->count++;
+}
+#endif
+
 VOID fini(INT32 code, VOID *v) {
 
 	if(vecdata.empty()) {
 
-		printf("vecdata empty!!\n");
+		printf("[fini] vecdata empty!!\n");
 		return;
 	}
 
@@ -69,14 +92,13 @@ VOID fini(INT32 code, VOID *v) {
 			FILE* fd = create_fd(pdata->tid);
 			if(!fd)	{
 
-				printf("fd is null\n");
+				printf("[fini] fd is null\n");
 				return;
 			}
 
 			pdata->print_data(fd);
-			delete pdata;
 
-		} else printf("pdata null\n");
+		} else printf("[fini] pdata null\n");
 
 		++it;
 	}
@@ -301,7 +323,7 @@ static VOID instruction(INS ins, void *a) {
 
 	if(!INS_Valid(ins))	{
 
-		printf("Unvalid Ins\n");
+		printf("[instruction] Unvalid Ins\n");
 		return;
 	}
 

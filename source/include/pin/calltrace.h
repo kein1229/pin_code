@@ -39,13 +39,6 @@ typedef enum{
 }eTYPE;
 
 typedef struct{
-	UINT ip;
-	UINT var_addr;
-	UINT old_data;
-	UINT new_data;
-}VALUE;
-
-typedef struct{
 	UINT nLine;
 	UINT call;
 	UINT nextip;
@@ -80,6 +73,7 @@ private:
 	UINT 	target_addr;
 	UINT 	ebp;
 	UINT 	esp;
+	UINT 	count;
 
 	string 	func_name;
 	string 	img_name;
@@ -148,6 +142,7 @@ CCall::CCall(UINT target, string str_func, string str_img,
 	this->target_addr   = target;
 	this->func_name 	= str_func;
 	this->img_name 		= str_img;
+	this->count 		= 0;
 
 	this->nextins_addr 	= next_ins;
 	this->ins_addr 		= ip;
